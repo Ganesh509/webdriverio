@@ -1,26 +1,37 @@
-name: CI Pipeline
+name: WebdriverIO Tests
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install Node
+        uses: actions/setup-node@v3
         with:
           node-version: 24
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
+      - name: Run Tests
+        run: npx wdio run wdio.conf.js
+
+      - name: Install Allure
+        run: |
+          sudo apt-get install allure
+
+      - name: Generate Report
+        run: allure generate allure-results --clean -o allure-report
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: allure-report
