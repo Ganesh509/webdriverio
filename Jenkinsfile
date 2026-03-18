@@ -23,9 +23,10 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Headless Tests') {
             steps {
                 sh '''
+                export HEADLESS=true
                 rm -rf allure-results
                 mkdir -p allure-results
                 npm test
