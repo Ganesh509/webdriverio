@@ -1,23 +1,67 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'node'
+    }
+
+    environment {
+        CI = 'true'
+    }
+
     stages {
-        stage('Build') {
+
+        stage('Checkout Code') {
             steps {
-                echo 'Building the project...'
+                git branch: 'main', url: 'https://github.com/your-username/your-repo.git'
             }
         }
 
-        stage('Test') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Running tests...'
+                sh 'npm install'
             }
         }
 
-        stage('Deploy') {
+        stage('Run Tests') {
             steps {
-                echo 'Deploying application...'
+                sh '''
+                rm -rf allure-results
+                mkdir -p allure-results
+                npm test
+                '''
             }
+        }
+
+        stage('Generate Allure Report') {
+            steps {
+                allure includeProperties: false,
+                       jdk: '',
+                       results: [[path: 'allure-results']]
+            }
+        }
+    }
+
+    post {
+
+        always {
+            echo 'Pipeline completed.'
+        }
+
+        success {
+            echo 'Build SUCCESS ✅'
+        }
+
+        failure {
+            echo 'Build FAILED ❌'
+        }
+
+        unstable {
+            echo 'Build UNSTABLE ⚠️'
+        }
+
+        cleanup {
+            cleanWs()
         }
     }
 }
